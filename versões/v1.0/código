@@ -1,1 +1,60 @@
+from time import sleep
 
+divisa = "-"
+
+
+def tela_principal():
+    print(f"Sistema de Login\n{divisa * 16}")
+    while True:
+        print(f"Sistema de Login:\n (1)Login\n (2)Novo login\n (3)Sair\n{divisa * 16}")
+        escolha = input("Escolher: ").strip()
+        if escolha == '1':
+            tela_login()
+            break
+        elif escolha == '2':
+            tela_novo_login()
+            break
+        elif escolha == '3':
+            print("Encerrando...")
+            sleep(2)
+            break
+        else:
+            print("Erro.Tente apenas(1, 2 ou 3): ")
+
+
+def tela_login():
+    usuario = input("Usuário: ").strip()
+    senha = input("Senha: ").strip()
+    dados = open('usuarios.txt', 'r+').read().split('\n')
+    voltas = 0
+    for i in dados:
+        if i == usuario + ' ' + senha:
+            print('Logando...')
+            sleep(2)
+            print(f'Bem-vindo {usuario}')
+            break
+        else:
+            voltas += 1
+            if voltas == len(dados):
+                print('Usuário ou senha incorretos.Tente novamente.')
+
+
+def tela_novo_login():
+    usuario = input("Novo usuário: ").strip()
+    senha = input("Senha: ").strip()
+    dados = open('usuarios.txt', 'r+').read().split('\n')
+    voltas = 0
+    for i in dados:
+        if i == usuario + ' ' + senha:
+            print("Esse nome já esta em uso.Tente novamente.")
+            break
+        else:
+            voltas += 1
+            if voltas == len(dados):
+                dados = open('usuarios.txt', 'a+')
+                dados.seek(0, 0)
+                dados.write(f"{usuario + ' ' + senha}\n")
+                print("Usuário cadastrado com sucesso")
+
+
+tela_principal()
