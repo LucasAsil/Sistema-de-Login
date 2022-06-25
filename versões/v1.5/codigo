@@ -1,4 +1,3 @@
-from time import sleep
 import pyodbc
 from hashlib import md5
 
