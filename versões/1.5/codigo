@@ -1,0 +1,83 @@
+from time import sleep
+import pyodbc
+from hashlib import md5
+
+divisa = "-"
+
+
+# Some other example server values are
+# server = 'localhost\sqlexpress' # for a named instance
+# server = 'myserver,port' # to specify an alternate port
+def retornar_conexao_sql():
+    server = ''  # Servidor
+    database = ''  # Banco
+    username = ''  # Nome de usuário
+    password = ''  # Senha de usuário
+    cnxn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};SERVER=' + server + ';DATABASE=' + database + ';UID='
+                          + username + ';PWD=' + password)
+    return cnxn.cursor()
+
+
+def tela_principal():
+    print(f"Sistema de Login\n{divisa * 16}")
+    while True:
+        print(f"Sistema de Login:\n (1)Login\n (2)Novo login\n (3)Sair\n{divisa * 16}")
+        escolha = input("Escolher: ").strip()
+        if escolha == '1':
+            tela_login()
+            break
+        elif escolha == '2':
+            tela_novo_login()
+            break
+        elif escolha == '3':
+            print("Encerrando...")
+            sleep(2)
+            break
+        else:
+            print("Erro.Tente apenas(1, 2 ou 3): ")
+
+
+def tela_login():
+    usuario = input("Usuário: ").strip()
+    senha = input("Senha: ").strip().encode("utf8")
+    senha_hash = md5(senha).hexdigest()
+    cursor = retornar_conexao_sql()
+    cursor.execute(f"SELECT * FROM usuario WHERE nome = '{usuario}' and senha = '{senha_hash}'")
+    row = cursor.fetchone()
+    x = 1
+    while row:
+        dado = str(row[0]) + ' ' + str(row[1])
+        row = cursor.fetchone()
+        senha_hash = md5(senha).hexdigest()
+        if dado == usuario + ' ' + senha_hash:
+            x = 0
+            print(f"Bem vindo {usuario}")
+    if x == 1:
+        print("Usuário ou senha incorretos.Tente novamente.")
+
+
+def tela_novo_login():
+    usuario = input("Novo usuário: ").strip()
+    senha = input("Senha: ").strip().encode("utf8")
+    if len(usuario) > 20 or len(senha) > 12:
+        print("Os caractéres execedem o limite.Tente Novamente(20 para usuario, 12 para senha).")
+        tela_novo_login()
+    cursor = retornar_conexao_sql()
+    cursor.execute(f"SELECT * FROM usuario WHERE nome = '{usuario}'")
+    row = cursor.fetchone()
+    x = 1
+    while row:
+        dado = (str(row[0]))
+        row = cursor.fetchone()
+        if dado == usuario:
+            x = 0
+            print("Esse usuário já existe.Tente outro nome")
+    if x == 1:
+        senha_hash = md5(senha).hexdigest()
+        cursor.execute(f"INSERT INTO usuario(nome, senha) VALUES('{usuario}', '{senha_hash}')")
+        cursor.commit()
+        cursor.close()
+        print("Usuário adicionado")
+
+
+tela_principal()
